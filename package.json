@@ -1,0 +1,23 @@
+{
+  "name": "typescript-study",
+  "version": "1.0.0",
+  "description": "## Why 타입스크립트?",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "lite-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jisu2433/TypeScript-study.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jisu2433/TypeScript-study/issues"
+  },
+  "homepage": "https://github.com/jisu2433/TypeScript-study#readme",
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
