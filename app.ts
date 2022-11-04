@@ -1,16 +1,36 @@
-function add(n1: number, n2: number, showResult: boolean) {
-    // if (typeof n1 !== 'number' || typeof n2 !== 'number'){
-    //     throw new Error('Incorrect input!');
-    // }
-    if (showResult) {
-        console.log(n1+n2);
-    } else {
-    return n1 + n2;
-    }
+// const person: {
+//     name: string;
+//     age: number;
+//     hobbies: string[];
+//     role: [number, string];
+// } = {
+//     name: 'Dana',
+//     age: 27,
+//     hobbies: ['Sports', 'Cooking'],
+//     role: [2, 'author']
+// };
+
+enum ROLE {ADMIN, READ_ONLY, AUTHOR};
+
+const person = {
+    name: 'Dana',
+    age: 27,
+    hobbies: ['Sports', 'Cooking'],
+    role: ROLE.AUTHOR
+}; 
+
+// person.role.push('admin');
+// person.role[1] = 'dada';
+
+let favoriteActivities: string[];
+favoriteActivities = ['Sports'];
+
+console.log(person.name);
+
+for (const hobby of person.hobbies) {
+    console.log(hobby);
 }
 
-const number1 = 5;
-const number2 = 2.8;
-const printResult = true;
-
-add(number1, number2, printResult);
+if (person.role === ROLE.AUTHOR) {
+    console.log('is author');
+}
