@@ -1,36 +1,17 @@
-// const person: {
-//     name: string;
-//     age: number;
-//     hobbies: string[];
-//     role: [number, string];
-// } = {
-//     name: 'Dana',
-//     age: 27,
-//     hobbies: ['Sports', 'Cooking'],
-//     role: [2, 'author']
-// };
-var ROLE;
-(function (ROLE) {
-    ROLE[ROLE["ADMIN"] = 0] = "ADMIN";
-    ROLE[ROLE["READ_ONLY"] = 1] = "READ_ONLY";
-    ROLE[ROLE["AUTHOR"] = 2] = "AUTHOR";
-})(ROLE || (ROLE = {}));
-;
-var person = {
-    name: 'Dana',
-    age: 27,
-    hobbies: ['Sports', 'Cooking'],
-    role: ROLE.AUTHOR
-};
-// person.role.push('admin');
-// person.role[1] = 'dada';
-var favoriteActivities;
-favoriteActivities = ['Sports'];
-console.log(person.name);
-for (var _i = 0, _a = person.hobbies; _i < _a.length; _i++) {
-    var hobby = _a[_i];
-    console.log(hobby);
+function add(n1, n2) {
+    return n1 + n2;
 }
-if (person.role === ROLE.AUTHOR) {
-    console.log('is author');
+function printResult(num) {
+    console.log('Result: ' + num);
 }
+function addAndHandle(n1, n2, cb) {
+    var result = n1 + n2;
+    cb(result);
+}
+printResult(add(5, 12));
+var combineValues;
+combineValues = add;
+console.log(combineValues(8, 8));
+addAndHandle(10, 20, function (result) {
+    console.log(result);
+});

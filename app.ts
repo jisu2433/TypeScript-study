@@ -1,36 +1,15 @@
-// const person: {
-//     name: string;
-//     age: number;
-//     hobbies: string[];
-//     role: [number, string];
-// } = {
-//     name: 'Dana',
-//     age: 27,
-//     hobbies: ['Sports', 'Cooking'],
-//     role: [2, 'author']
-// };
+let userInput: any;
+let userName: string;
 
-enum ROLE {ADMIN, READ_ONLY, AUTHOR};
-
-const person = {
-    name: 'Dana',
-    age: 27,
-    hobbies: ['Sports', 'Cooking'],
-    role: ROLE.AUTHOR
-}; 
-
-// person.role.push('admin');
-// person.role[1] = 'dada';
-
-let favoriteActivities: string[];
-favoriteActivities = ['Sports'];
-
-console.log(person.name);
-
-for (const hobby of person.hobbies) {
-    console.log(hobby);
+userInput = 5;
+userInput = 'Max';
+if (typeof userInput === 'string'){
+    userName = userInput;
 }
 
-if (person.role === ROLE.AUTHOR) {
-    console.log('is author');
+function generateError(message: string, code: number): never{
+    throw {message: message, errorCode: code};
 }
+
+const result = generateError('An error occurred!', 500);
+console.log(result);
