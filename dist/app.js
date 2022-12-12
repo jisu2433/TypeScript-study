@@ -39,6 +39,7 @@ class AccountingDepartment extends Department {
         this.reports = reports;
         this.lastReport = reports[0];
     }
+    // get, set ������ ĸ��ȭ�ϰ� �Ӽ��� �аų� �����Ϸ� �� �� ����Ǿ�� �ϴ� �߰����� ������ �߰��ϴ� �� ����
     get mostRecentReport() {
         if (this.lastReport) {
             return this.lastReport;
