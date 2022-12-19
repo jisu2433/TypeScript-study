@@ -1,156 +1,91 @@
-type Admin = {
-    name: string;
-    privileges: string[];
-};
+// const names: Array<string> = [];
+// // names[0].split(' ');
 
-type Employee = {
-    name: string;
-    startDate: Date;
-};
+// const promise: Promise<string> = new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//         resolve('This is done!')
+//     }, 2000);
+// });
 
-type ElevatedEmployee = Admin & Employee;
+// promise.then(data => {
+//     data.split(' ');
+// })
 
-// interface Admin = {
-//     name: string;
-//     privileges: string[];
-// };
+// 제네릭 타입을 사용하면 보다 나은 타입 안정성을 확보할 수 있따.
 
-// interface Employee = {
-//     name: string;
-//     startDate: Date;
-// };
-
-// interface ElevatedEmployee extends Employee, Admin {}
-
-
-const e1: ElevatedEmployee = {
-    name: 'Max',
-    privileges: ['create-server'],
-    startDate: new Date()
-};
-
-type Combinable = string | number;
-type Numeric = number | boolean;
-
-type Universal = Combinable & Numeric;
-
-// 인터섹션 연산자는 어떤 타입과도 사용할 수 있어서 이러한 타입들이 교차하도록 간단하게 구현할 수 있음
-// 유니언 타입은 타입 간에 공통점이 있는 타입
-// 객체 타입은 간단히 말해 객체 속성의 조합
-
-function add(a: number, b: number): number;
-function add(a: string, b: string): string;
-function add(a: string, b: number): string;  
-function add(a: number, b: string): string;   
-function add(a: Combinable, b: Combinable) {
-    if(typeof a === 'string' || typeof b === 'string'){ //타입가드
-        return a.toString() + b.toString();
-    }
-    return a + b;
+function merge<T extends object, U extends object>(objA: T, objB: U){
+    return Object.assign(objA, objB);
 }
 
-const result = add('Max', ' Schwarz');
-result.split(' ');
+const mergedObj = merge({name : 'dana', hobbies: ['picture']}, {age: 27});
+console.log(mergedObj);
 
-const fetchedUserData = {
-    id: 'u1',
-    name: 'Max',
-    job: {title: 'CEO', description: 'My own company'}
-};
+interface Lengthy {
+    length : number;
+}
 
-console.log(fetchedUserData?.job.title);
+function countAndDescribe<T extends Lengthy>(element: T): [T, string]{
+    let descriptionText = 'Got no value.';
+    if (element.length === 1){
+        descriptionText = 'Got 1 element.';
+    } else if (element.length > 1) {
+        descriptionText = 'Got ' +element.length + ' elements.'; 
+    }
+    return [element, descriptionText];
+}
 
-const userInput = '';
+function extractAndConvert<T extends object, U extends keyof T>(
+    obj: T,
+    key: U
+){
+    return 'Value: ' + obj[key];
+}
 
-const storedData = userInput ?? 'DEFAULT';
-// ?? null 병합 연산자 
-// 선택적 체이닝 연산자, 정의되어 있는지 여부가 확실치 않은 요소 다음에 물음표를 추가하면 된당.
-// 선택적 체이닝 연산자는 객체 데이터의 중첩된 속성과 객체에 안전하게 접근할 수 있게 해줌
-// type UnknownEmployee = Employee | Admin;
+extractAndConvert({name: 'dana'}, 'name');
 
-// function printEmployeeInformation(emp: UnknownEmployee){
-//     console.log('Name: ' + emp.name);
-//     if ('privileges' in emp){
-//         console.log('Privileges: ' + emp.privileges);
-//     }
-//     if ('startDate' in emp){
-//         console.log('Start  Date: ' + emp.startDate);
-//     }
-// }
+class DataStorage<T> {
+    private data: T[] = [];
 
-// printEmployeeInformation(e1)
+    addItem(item: T){
+        this.data.push(item)
+    }
 
-// class Car {
-//     drive() {
-//         console.log('Driving...');
-//     }
-// }
+    removeItem(item: T){
+        this.data.splice(this.data.indexOf(item),1);
+    }
 
-// class Truck {
-//     drive() {
-//         console.log('Driving a truck...');
-//     }
+    getItems(){
+        return [...this.data];
+    }
+}
 
-//     loadCargo(amount: number){
-//         console.log('Loading cargo ...' + amount);
-//     }
-// }
+// const textStorage = new DataStorage<string>();
+// textStorage.addItem('Dana');
+// textStorage.addItem('Woojin');
+// textStorage.removeItem('Woojin');
+// console.log(textStorage.getItems());
 
-// type Vehicle = Car | Truck;
+const numberStorage = new DataStorage<number>();
 
-// const v1 = new Car();
-// const v2 = new Truck();
+interface CourseGoal {
+    title: string;
+    description: string;
+    completeUntil: Date;
+}
 
-// function useVehicle(vehicle: Vehicle){
-//     vehicle.drive();
-//     if (vehicle instanceof Truck){
-//         vehicle.loadCargo(1000);
-//     }
-// }
+function createCourseGoal(
+    title: string, 
+    description: string, 
+    date: Date
+    ): CourseGoal{
+        let courseGoal: Partial<CourseGoal> = {};
+        courseGoal.title = title;
+        courseGoal.description = description;
+        courseGoal.completeUntil = date;
+        return courseGoal as CourseGoal;
+}
 
-// useVehicle(v1);
-// useVehicle(v2);
+const names: Readonly<string[]> = ['dana', 'woojin'];
 
-// interface Bird {
-//     type: 'bird';
-//     flyingSpeed: number;
-// }
-
-// interface Horse {
-//     type: 'horse'
-//     runningSpeed: number;
-// }
-
-// type Animal = Bird | Horse;
-
-// function moveAnimal(animal: Animal){
-//     let speed;
-//     switch(animal.type) {
-//         case 'bird':
-//             speed = animal.flyingSpeed;
-//             break;
-//         case 'horse':
-//             speed = animal.runningSpeed;
-//     }
-//     console.log('Moving at speed: ' + speed);
-// }
-
-// moveAnimal({type: 'bird', flyingSpeed: 10});
-
-// // 형 변환은 타입스크립트가 직접 감지하지 못하는 특정 타입의 값을 타입스크립트에 알려주는 역할
-
-// const userInputElement = <HTMLInputElement>document.getElementById('user-input');
-// //const userInputElement = <HTMLInputElement>document.getElementById('user-input')! as HTMLInputElement;
-// if(userInputElement){
-//     (userInputElement as HTMLInputElement).value = 'Hi there!';
-// }
-// // 느낌표를 사용하여 느낌표 앞의 표현식을 null로 반환하지 않겠다고 타입스크립트에게 인식시킬 수 있음
-
-// interface ErrorContainer { //{ email: 'Not a valid email', username: 'Must start with a character!'}
-//     [prop: string]: string;
-// }
-
-// const errorBag: ErrorContainer = {
-//     email: 'Not a valid email!',
-//     username: 'Must start with a capital character!'
-// };
+// 유니언 타입은 함수를 호출할 때마다 이 타입들 중 하나로 호출할 수 있는 함수가 필요한 경우에 유용
+// 제네릭 타입은 특정 타입을 고정하거나, 전체 클래스 인스턴스에 걸쳐 같은 함수를 사용하거나, 같은 타입을 사용하고자 할 때 제네릭 타입은 유용
