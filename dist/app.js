@@ -1,61 +1,175 @@
 "use strict";
-// const names: Array<string> = [];
-// // names[0].split(' ');
-// const promise: Promise<string> = new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//         resolve('This is done!')
-//     }, 2000);
-// });
-// promise.then(data => {
-//     data.split(' ');
-// })
-// ���׸� Ÿ���� ����ϸ� ���� ���� Ÿ�� �������� Ȯ���� �� �ֵ�.
-function merge(objA, objB) {
-    return Object.assign(objA, objB);
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+function Logger(logString) {
+    console.log('LOGGER FACTORY');
+    return function (constructor) {
+        console.log(logString);
+        console.log(constructor);
+    };
 }
-const mergedObj = merge({ name: 'dana', hobbies: ['picture'] }, { age: 27 });
-console.log(mergedObj);
-function countAndDescribe(element) {
-    let descriptionText = 'Got no value.';
-    if (element.length === 1) {
-        descriptionText = 'Got 1 element.';
+// ���ڷ����ʹ� ��üȭ�Ǳ� �� Ŭ������ ���Ǹ� �ŵ� �����
+function WithTemplate(template, hookId) {
+    console.log('TEMPLATE FACTORY');
+    return function (originalConstructor) {
+        return class extends originalConstructor {
+            constructor(...args) {
+                super();
+                console.log('Rendering template');
+                const hookEl = document.getElementById(hookId);
+                if (hookEl) {
+                    hookEl.innerHTML = template;
+                    hookEl.querySelector('h1').textContent = this.name;
+                }
+            }
+        };
+    };
+    let Person = class Person {
+        constructor() {
+            this.name = 'Max';
+            console.log('Creating person object...');
+        }
+    };
+    Person = __decorate([
+        Logger('LOGGING'),
+        WithTemplate('<h1>My Person Object</h1>', 'app')
+    ], Person);
+    // --
+    function Log(target, propertyName) {
+        console.log('Property decorator!');
+        console.log(target, propertyName);
     }
-    else if (element.length > 1) {
-        descriptionText = 'Got ' + element.length + ' elements.';
+    function Log2(target, name, descriptor) {
+        console.log('Accessor decorator!');
+        console.log(target);
+        console.log(name);
+        console.log(descriptor);
     }
-    return [element, descriptionText];
+    function Log3(target, name, descriptor) {
+        console.log('Method decorator!');
+        console.log(target);
+        console.log(name);
+        console.log(descriptor);
+    }
+    function Log4(target, name, position) {
+        console.log('Parameter decorator!');
+        console.log(target);
+        console.log(name);
+        console.log(position);
+    }
+    class Product {
+        constructor(t, p) {
+            this.title = t;
+            this._price = p;
+        }
+        set price(val) {
+            if (val > 0) {
+                this._price = val;
+            }
+            else {
+                throw new Error('Invalid price - should be positive!');
+            }
+        }
+        getPriceWithTax(tax) {
+            return this._price * (1 + tax);
+        }
+    }
+    __decorate([
+        Log
+    ], Product.prototype, "title", void 0);
+    __decorate([
+        Log2
+    ], Product.prototype, "price", null);
+    __decorate([
+        Log3,
+        __param(0, Log4)
+    ], Product.prototype, "getPriceWithTax", null);
 }
-function extractAndConvert(obj, key) {
-    return 'Value: ' + obj[key];
+// ������ ��ȯ�� �� �ִ� ���ڷ����ʹ� �޼��忡 �߰��� ���ڷ����ͳ� �����ڿ� �߰��� ���ڷ����� 
+function Autobind(_, _2, descriptor) {
+    const originalMethod = descriptor.value;
+    const adjDescriptor = {
+        configurable: true,
+        enumerable: false,
+        get() {
+            const boundFn = originalMethod.bind(this);
+            return boundFn;
+        }
+    };
+    return adjDescriptor;
 }
-extractAndConvert({ name: 'dana' }, 'name');
-class DataStorage {
+class Printer {
     constructor() {
-        this.data = [];
+        this.message = 'This works!';
     }
-    addItem(item) {
-        this.data.push(item);
-    }
-    removeItem(item) {
-        this.data.splice(this.data.indexOf(item), 1);
-    }
-    getItems() {
-        return [...this.data];
+    showMessage() {
+        console.log(this.message);
     }
 }
-// const textStorage = new DataStorage<string>();
-// textStorage.addItem('Dana');
-// textStorage.addItem('Woojin');
-// textStorage.removeItem('Woojin');
-// console.log(textStorage.getItems());
-const numberStorage = new DataStorage();
-function createCourseGoal(title, description, date) {
-    let courseGoal = {};
-    courseGoal.title = title;
-    courseGoal.description = description;
-    courseGoal.completeUntil = date;
-    return courseGoal;
+__decorate([
+    Autobind
+], Printer.prototype, "showMessage", null);
+const p = new Printer();
+const button = document.querySelector('button');
+button.addEventListener('click', p.showMessage);
+const registeredValidators = {};
+function Required(target, propName) {
+    var _a, _b;
+    registeredValidators[target.constructor.name] = Object.assign(Object.assign({}, registeredValidators[target.constructor.name]), { [propName]: [...((_b = (_a = registeredValidators[target.constructor.name]) === null || _a === void 0 ? void 0 : _a[propName]) !== null && _b !== void 0 ? _b : []), 'required'] });
 }
-const names = ['dana', 'woojin'];
-// ���Ͼ� Ÿ���� �Լ��� ȣ���� ������ �� Ÿ�Ե� �� �ϳ��� ȣ���� �� �ִ� �Լ��� �ʿ��� ��쿡 ����
-// ���׸� Ÿ���� Ư�� Ÿ���� �����ϰų�, ��ü Ŭ���� �ν��Ͻ��� ���� ���� �Լ��� ����ϰų�, ���� Ÿ���� ����ϰ��� �� �� ���׸� Ÿ���� ����
+function PositiveNumber(target, propName) {
+    registeredValidators[target.constructor.name];
+}
+function validate(obj) {
+    const objValidatorConfig = registeredValidators[obj.constructor.name];
+    if (!objValidatorConfig) {
+        return true;
+    }
+    let isValid = true;
+    for (const prop in objValidatorConfig) {
+        for (const validator of objValidatorConfig[prop]) {
+            switch (validator) {
+                case 'required':
+                    isValid = isValid && !!obj[prop];
+                    break;
+                case 'positive':
+                    isValid = isValid && obj[prop] > 0;
+                    break;
+            }
+        }
+    }
+    return true;
+}
+class Course {
+    constructor(t, p) {
+        this.title = t;
+        this.price = p;
+    }
+}
+__decorate([
+    Required
+], Course.prototype, "title", void 0);
+__decorate([
+    PositiveNumber
+], Course.prototype, "price", void 0);
+const courseForm = document.querySelector('form');
+courseForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const titleEl = document.getElementById('title');
+    const priceEl = document.getElementById('price');
+    const title = titleEl.value;
+    const price = +priceEl.value;
+    const createdCourse = new Course(title, price);
+    if (!validate(createdCourse)) {
+        alert('Invalid input, please try again!');
+        return;
+    }
+    console.log(createdCourse);
+});
