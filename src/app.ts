@@ -1,91 +1,189 @@
-// const names: Array<string> = [];
-// // names[0].split(' ');
-
-// const promise: Promise<string> = new Promise((resolve, reject) => {
-//     setTimeout(() => {
-//         resolve('This is done!')
-//     }, 2000);
-// });
-
-// promise.then(data => {
-//     data.split(' ');
-// })
-
-// 제네릭 타입을 사용하면 보다 나은 타입 안정성을 확보할 수 있따.
-
-function merge<T extends object, U extends object>(objA: T, objB: U){
-    return Object.assign(objA, objB);
+function Logger(logString: string) {
+    console.log('LOGGER FACTORY')
+    return function(constructor: Function){
+        console.log(logString);
+        console.log(constructor)
+    }; 
 }
+// 데코레이터는 실체화되기 전 클래스가 정의만 돼도 실행됨
 
-const mergedObj = merge({name : 'dana', hobbies: ['picture']}, {age: 27});
-console.log(mergedObj);
+function WithTemplate(template: string, hookId: string){
+    console.log('TEMPLATE FACTORY')
+    return function<T extends {new(...args: any[]): {name: string}}>(originalConstructor:T){       
+        return class extends originalConstructor {
+        constructor(...args: any[]) {
+            super();
+            console.log('Rendering template')
+            const hookEl = document.getElementById(hookId);
+            if(hookEl){
+                hookEl.innerHTML = template;
+                hookEl.querySelector('h1')!.textContent = this.name;
+            }
+        }
+    };
+};
 
-interface Lengthy {
-    length : number;
-}
 
-function countAndDescribe<T extends Lengthy>(element: T): [T, string]{
-    let descriptionText = 'Got no value.';
-    if (element.length === 1){
-        descriptionText = 'Got 1 element.';
-    } else if (element.length > 1) {
-        descriptionText = 'Got ' +element.length + ' elements.'; 
-    }
-    return [element, descriptionText];
-}
+@Logger('LOGGING')
+@WithTemplate('<h1>My Person Object</h1>','app')
+class Person {
+    name = 'Max';
 
-function extractAndConvert<T extends object, U extends keyof T>(
-    obj: T,
-    key: U
-){
-    return 'Value: ' + obj[key];
-}
-
-extractAndConvert({name: 'dana'}, 'name');
-
-class DataStorage<T> {
-    private data: T[] = [];
-
-    addItem(item: T){
-        this.data.push(item)
-    }
-
-    removeItem(item: T){
-        this.data.splice(this.data.indexOf(item),1);
-    }
-
-    getItems(){
-        return [...this.data];
+    constructor() {
+        console.log('Creating person object...');
     }
 }
 
-// const textStorage = new DataStorage<string>();
-// textStorage.addItem('Dana');
-// textStorage.addItem('Woojin');
-// textStorage.removeItem('Woojin');
-// console.log(textStorage.getItems());
+// --
 
-const numberStorage = new DataStorage<number>();
+function Log(target: any, propertyName: string | Symbol){
+    console.log('Property decorator!');
+    console.log(target, propertyName);
+}
 
-interface CourseGoal {
+function Log2(target: any, name: string, descriptor: PropertyDescriptor){
+    console.log('Accessor decorator!');
+    console.log(target);
+    console.log(name);
+    console.log(descriptor);
+}
+
+function Log3(target: any, name: string | Symbol, descriptor: PropertyDescriptor){
+    console.log('Method decorator!');
+    console.log(target);
+    console.log(name);
+    console.log(descriptor);
+}
+
+function Log4(target: any, name: string | Symbol, position: number){
+    console.log('Parameter decorator!');
+    console.log(target);
+    console.log(name);
+    console.log(position);
+}
+
+class Product {
+    @Log
     title: string;
-    description: string;
-    completeUntil: Date;
+    private _price: number;
+    @Log2
+    set price(val: number){
+        if(val > 0){
+            this._price = val;
+        } else {
+            throw new Error('Invalid price - should be positive!')
+        }
+    }
+
+    constructor(t: string, p: number){
+        this.title = t;
+        this._price = p;
+    }
+    @Log3
+    getPriceWithTax(@Log4 tax: number){
+        return this._price * (1 + tax);
+    }
+}
 }
 
-function createCourseGoal(
-    title: string, 
-    description: string, 
-    date: Date
-    ): CourseGoal{
-        let courseGoal: Partial<CourseGoal> = {};
-        courseGoal.title = title;
-        courseGoal.description = description;
-        courseGoal.completeUntil = date;
-        return courseGoal as CourseGoal;
+// 뭔가를 반환할 수 있는 데코레이터는 메서드에 추가한 데코레이터나 접근자에 추가한 데코레이터 
+
+
+function Autobind(_: any, _2: string, descriptor: PropertyDescriptor){
+    const originalMethod = descriptor.value;
+    const adjDescriptor: PropertyDescriptor = {
+        configurable: true,
+        enumerable: false,
+        get() {
+            const boundFn = originalMethod.bind(this);
+            return boundFn;
+        }
+    };
+    return adjDescriptor;
 }
 
-const names: Readonly<string[]> = ['dana', 'woojin'];
 
-// 유니언 타입은 함수를 호출할 때마다 이 타입들 중 하나로 호출할 수 있는 함수가 필요한 경우에 유용
-// 제네릭 타입은 특정 타입을 고정하거나, 전체 클래스 인스턴스에 걸쳐 같은 함수를 사용하거나, 같은 타입을 사용하고자 할 때 제네릭 타입은 유용
+class Printer {
+    message = 'This works!';
+
+    @Autobind
+    showMessage() {
+        console.log(this.message);
+    }
+}
+
+const p = new Printer();
+
+const button = document.querySelector('button')!;
+button.addEventListener('click', p.showMessage);
+
+// 유효성 검사
+interface ValidatorConfig {
+    [property: string]: {
+        [validatableProp: string]: string[]
+    }
+}
+
+const registeredValidators: ValidatorConfig = {};
+
+function Required(target: any, propName: string){
+    registeredValidators[target.constructor.name] = {
+        ...registeredValidators[target.constructor.name],
+        [propName] : [...(registeredValidators[target.constructor.name]?.[propName] ?? []), 'required']
+    };
+}
+
+function PositiveNumber(target: any, propName: string) {
+    registeredValidators[target.constructor.name]
+}
+
+function validate(obj: any) {
+    const objValidatorConfig = registeredValidators[obj.constructor.name];
+    if (!objValidatorConfig){
+        return true;
+    }
+    let isValid = true;
+    for (const prop in objValidatorConfig){
+        for(const validator of objValidatorConfig[prop]){
+            switch(validator){
+                case 'required':
+                    isValid = isValid && !!obj[prop];
+                    break;
+                case 'positive':
+                    isValid = isValid && obj[prop] > 0;
+                    break;
+            }
+        }
+    }
+    return true;
+}
+
+class Course {
+    @Required
+    title: string;
+    @PositiveNumber
+    price: number;
+
+    constructor(t: string, p: number){
+        this.title = t;
+        this.price = p;
+    }
+}
+
+const courseForm = document.querySelector('form')!;
+courseForm.addEventListener('submit', event =>{
+    event.preventDefault();
+    const titleEl = document.getElementById('title') as HTMLInputElement;
+    const priceEl = document.getElementById('price') as HTMLInputElement;
+
+    const title = titleEl.value;
+    const price = +priceEl.value;
+
+    const createdCourse = new Course(title, price);
+    
+    if(!validate(createdCourse)){
+        alert('Invalid input, please try again!');
+        return;
+    }
+    console.log(createdCourse);
+});
